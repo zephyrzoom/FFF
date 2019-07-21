@@ -16,7 +16,7 @@ int 0x10
 ; so we need to add that padding beforehand. We'll do that in attempt 3
 mov al, "2"
 int 0x10
-mov al, [the_secret]
+mov al, [the_secret]    ; 相当于0x002d
 int 0x10
 
 ; attempt 3
