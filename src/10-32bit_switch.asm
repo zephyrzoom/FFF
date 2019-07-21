@@ -1,6 +1,6 @@
 [bits 16]
 switch_to_pm:
-    cli ; 1. disable interrupts
+    cli ; 1. disable interrupts； Clear Interrupt 设置IF=0
     lgdt [gdt_descriptor] ; 2. load the GDT descriptor
     mov eax, cr0
     or eax, 0x1 ; 3. set 32-bit mode bit in cr0, 最后一位设置为1，其他位不变
