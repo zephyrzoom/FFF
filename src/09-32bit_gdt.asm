@@ -1,5 +1,9 @@
 gdt_start: ; don't remove the labels, they're needed to compute sizes and jumps
     ; the GDT starts with a null 8-byte
+    ; osdev:The null descriptor which is never referenced by the processor. Certain emulators, 
+    ; like Bochs, will complain about limit exceptions if you do not have one present. 
+    ; Some use this descriptor to store a pointer to the GDT itself (to use with the LGDT instruction). 
+    ; The null descriptor is 8 bytes wide and the pointer is 6 bytes wide so it might just be the perfect place for this.
     dd 0x0 ; 4 byte
     dd 0x0 ; 4 byte
 
@@ -43,5 +47,5 @@ gdt_descriptor:
     dd gdt_start ; address (32 bit)
 
 ; define some constants for later use
-CODE_SEG equ gdt_code - gdt_start
-DATA_SEG equ gdt_data - gdt_start
+CODE_SEG equ gdt_code - gdt_start   ; 8，gdt之前的8byte，也就是8个地址
+DATA_SEG equ gdt_data - gdt_start   ; gdt_code的长度+gdt_start的长度，也就是8+8=16个地址
