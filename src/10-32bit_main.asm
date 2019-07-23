@@ -1,6 +1,6 @@
 [org 0x7c00] ; bootloader offset
              ; 不设置[bits 32]或者[bits 16]时，为实模式，CPU总是按照16位跳转
-    mov bp, 0x9000 ; set the stack
+    mov bp, 0x9000 ; set the stack，设置栈为了之后调用call时压栈call的下一条指令
     mov sp, bp
 
     mov bx, MSG_REAL_MODE
@@ -17,7 +17,7 @@
 
 [bits 32]
 BEGIN_PM: ; after the switch we will get here
-    mov ebx, MSG_PROT_MODE
+    mov ebx, MSG_PROT_MO DE
     call print_string_pm ; Note that this will be written at the top left corner
     jmp $
 

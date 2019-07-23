@@ -6,7 +6,7 @@ int 0x10 ; we already saw this doesn't work, right?
 mov bx, 0x7c0 ; remember, the segment is automatically <<4 for you
 mov ds, bx ; ds数据段寄存器
 ; WARNING: from now on all memory references will be offset by 'ds' implicitly
-mov al, [the_secret]
+mov al, [the_secret] ; 实际地址为ds * 0x10 + the_secret
 int 0x10
 
 ; es是扩展寄存器，需要显示调用

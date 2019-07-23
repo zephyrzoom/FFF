@@ -1,5 +1,5 @@
 gdt_start: ; don't remove the labels, they're needed to compute sizes and jumps
-    ; the GDT starts with a null 8-byte
+    ; the GDT starts with a null 8-byte，相当于一个空gdt
     ; osdev:The null descriptor which is never referenced by the processor. Certain emulators, 
     ; like Bochs, will complain about limit exceptions if you do not have one present. 
     ; Some use this descriptor to store a pointer to the GDT itself (to use with the LGDT instruction). 
