@@ -17,7 +17,7 @@
 
 [bits 32]
 BEGIN_PM: ; after the switch we will get here
-    mov ebx, MSG_PROT_MO DE
+    mov ebx, MSG_PROT_MODE
     call print_string_pm ; Note that this will be written at the top left corner
     jmp $
 
