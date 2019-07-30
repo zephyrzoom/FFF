@@ -4,7 +4,7 @@
 #include "types.h"
 
 /* ISRs reserved for CPU exceptions 
- * 在汇编里实现interrupt.asm，所以声明为extern
+ * 在汇编里实现interrupt.asm，所以声明为extern，使用asm中定义的函数
  */
 extern void isr0();
 extern void isr1();

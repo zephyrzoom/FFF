@@ -2,11 +2,15 @@
 #include "../kernel/util.h"
 
 void set_idt_gate(int n, u32 handler) {
-    idt[n].low_offset = low_16(handler);
-    idt[n].sel = KERNEL_CS;
-    idt[n].always0 = 0;
-    idt[n].flags = 0x8E; 
-    idt[n].high_offset = high_16(handler);
+    idt[n].low_offset = low_16(handler);    // 中断函数地址的高位
+    idt[n].sel = KERNEL_CS; // 中断函数选择器，GDT或LDT中的代码段选择器
+    idt[n].always0 = 0; // 8个
+    idt[n].flags = 0x8E;    // 10001110b
+                            // present设置为0不使用中断
+                            //  特权级别 两位 调用时至少要有的级别，可以保护硬件和CPU中断
+                            //    设置为0用于interrupt gate和trap gate
+                            //     32位中断gate
+    idt[n].high_offset = high_16(handler);  // 中断函数地址的高位
 }
 
 void set_idt() {
