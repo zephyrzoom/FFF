@@ -14,7 +14,7 @@ void main() {
 void user_input(char *input) {
     if (strcmp(input, "END") == 0) {
         kprint("Stopping the CPU. Bye!\n");
-        asm volatile("hlt");
+        asm volatile("hlt");    // 处理器暂停
     }
     kprint("You said: ");
     kprint(input);

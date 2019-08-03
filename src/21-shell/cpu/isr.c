@@ -45,6 +45,13 @@ void isr_install() {
     set_idt_gate(31, (u32)isr31);
 
     // Remap the PIC
+    // PIC接受IRQ，再转发给CPU，CPU会将IRQ号转换为ISR号，CPU会通过out指令和硬件外设交互
+    // PIC一共有2个，每个有8个不同输入，再加一个输出，主PIC的输出连接CPU，辅PIC的输出连接主PIC的二号输入口
+    // 默认情况IRQs 0 to 7 are set to interrupts 08h to 0Fh, and IRQs 8 to 15 are set to interrupts 70h to 77h
+    // priority level: 0, 1, 2, 8, 9, 10, 11, 12, 13, 14, 15, 3, 4, 5, 6, 7.
+    // CPU has reserved interrupts 0-31
+    // 可以映射范围，8为单位，为避免cpu保留中断，应该大于等于0x20,multiples of 08h: 00h-07h, 08h-0Fh, 10h-17h, 17h-1Fh. And you probably want to use 20h-27h
+    // each PIC has to be programmed separately. You can tell the Master PIC to map IRQs 0-7 to INTs 20h-27h, but IRQs 8-F will still be INTs 70h-77h
     port_byte_out(0x20, 0x11);
     port_byte_out(0xA0, 0x11);
     port_byte_out(0x21, 0x20);
@@ -127,18 +134,20 @@ void isr_handler(registers_t r) {
 }
 
 void register_interrupt_handler(u8 n, isr_t handler) {
+    // n为IRQ0,IRQ1...IRQ15，这里仅仅注册了IRQ0和IRQ1
     interrupt_handlers[n] = handler;
 }
 
 void irq_handler(registers_t r) {
     /* After every interrupt we need to send an EOI to the PICs
-     * or they will not send another interrupt again */
+     * or they will not send another interrupt again 
+     * 大于40需要由第二个PIC控制器控制*/
     if (r.int_no >= 40) port_byte_out(0xA0, 0x20); /* slave */
     port_byte_out(0x20, 0x20); /* master */
 
     /* Handle the interrupt in a more modular way */
     if (interrupt_handlers[r.int_no] != 0) {
-        isr_t handler = interrupt_handlers[r.int_no];
+        isr_t handler = interrupt_handlers[r.int_no];   // 这个中断号有处理函数的话执行，只有IRQ0和IRQ1有处理函数
         handler(r);
     }
 }

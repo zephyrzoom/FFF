@@ -11,7 +11,7 @@ static void timer_callback(registers_t regs) {
 }
 
 void init_timer(u32 freq) {
-    /* Install the function we just wrote */
+    /* Install the function we just wrote 注册时钟处理函数*/
     register_interrupt_handler(IRQ0, timer_callback);
 
     /* Get the PIT value: hardware clock at 1193180 Hz */
