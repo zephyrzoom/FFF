@@ -7,7 +7,7 @@ OBJ = ${C_SOURCES:.c=.o cpu/interrupt.o}
 CC = gcc
 GDB = gdb
 # -g: Use debugging symbols in gcc
-CFLAGS = -g -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -Werror
+CFLAGS = -g -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I /mnt/c/cygwin64/usr/include
 
 # First rule is run by default
 os-image.bin: boot/bootsect.bin kernel.bin
