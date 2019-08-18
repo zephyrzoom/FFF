@@ -1,5 +1,41 @@
-halt:
-    jmp halt
+mov ah, 0x0e
+mov al, 'F'
+int 0x10
+int 0x10
+int 0x10
+mov al, 'O'
+int 0x10
+mov al, 'S'
+int 0x10
+mov al, ' '
+int 0x10
+mov al, 'i'
+int 0x10
+mov al, 's'
+int 0x10
+mov al, ' '
+int 0x10
+mov al, 'l'
+int 0x10
+mov al, 'o'
+int 0x10
+mov al, 'a'
+int 0x10
+mov al, 'd'
+int 0x10
+mov al, 'i'
+int 0x10
+mov al, 'n'
+int 0x10
+mov al, 'g'
+int 0x10
+mov al, '.'
+int 0x10
+int 0x10
+int 0x10
+
+
+jmp $
 
 times 510-($-$$) db 0
-dw 0xaa51   ; intel和amd都是小端模式，存储的时候低地址是55，高地址是aa
+dw 0xaa55
