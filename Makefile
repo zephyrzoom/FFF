@@ -1,2 +1,9 @@
+AS = $(HOME)/Public/cross/bin/i686-elf-as
+GCC = $(HOME)/Public/cross/bin/i686-elf-gcc
+CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 all:
-	as --32 -march=i686 boot.s -o boot.o
+	${AS} boot.s -o boot.o
+	${GCC} ${CFLAGS} -c kernel.c -o kernel.o
+
+clean:
+	rm -rf *.o
