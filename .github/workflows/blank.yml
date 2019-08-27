@@ -12,7 +12,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: Run a one-line script
+    - name: Install prepare tools
+      run: apt install nasm
+    - name: Run build
       run: make all
     - name: Run a multi-line script
       run: |
