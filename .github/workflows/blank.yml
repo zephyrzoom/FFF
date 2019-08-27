@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install prepare tools
-      run: apt install nasm
+      run: sudo apt install nasm
     - name: Run build
       run: make all
     - name: Run a multi-line script
