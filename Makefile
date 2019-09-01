@@ -14,6 +14,8 @@ INTERNAL_OBJS:=$(CRTI_OBJ) $(OBJS) $(CRTN_OBJ)
 all:
 	${AS} boot.s -o boot.o
 	${CC} ${CFLAGS} -c kernel.c -o kernel.o
+	${AS} crti.s -o crti.o
+	${AS} crtn.s -o crtn.o
 	# ${CC} -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot.o kernel.o -lgcc
 	$(CC) -o myos.bin $(OBJ_LINK_LIST) -nostdlib -lgcc
 	cp myos.bin isodir/boot/myos.bin
