@@ -2,14 +2,14 @@ AS = $(HOME)/Public/cross/bin/i686-elf-as
 CC = $(HOME)/Public/cross/bin/i686-elf-gcc
 CFLAGS = -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 
-OBJS:=boot.o kernel.o
+OBJS:=kernel.o
 CRTI_OBJ=crti.o
 CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
 CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
 CRTN_OBJ=crtn.o
  
-OBJ_LINK_LIST:=$(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJS) $(CRTEND_OBJ) $(CRTN_OBJ)
-INTERNAL_OBJS:=$(CRTI_OBJ) $(OBJS) $(CRTN_OBJ) *.bin *.iso
+OBJ_LINK_LIST:=boot.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(OBJS) $(CRTEND_OBJ) $(CRTN_OBJ)
+INTERNAL_OBJS:=$(CRTI_OBJ) $(OBJS) $(CRTN_OBJ) isodir/boot/*.bin *.iso boot.o
 
 all:
 	${AS} boot.s -o boot.o
