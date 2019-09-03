@@ -1,143 +1,101 @@
-#include <stdbool.h>
+// GCC provides these header files automatically
+// They give us access to useful things like fixed-width types
 #include <stddef.h>
 #include <stdint.h>
-
-/* Check if the compiler thinks you are targeting the wrong operating system. */
+ 
+// First, let's do some basic checks to make sure we are using our x86-elf cross-compiler correctly
 #if defined(__linux__)
-#error "You are not using a cross-compiler, you will most certainly run into trouble"
+	#error "This code must be compiled with a cross-compiler"
+#elif !defined(__i386__)
+	#error "This code must be compiled with an x86-elf compiler"
 #endif
-
-/* This tutorial will only work for the 32-bit ix86 targets. */
-#if !defined(__i386__)
-#error "This tutorial needs to be compiled with a ix86-elf compiler"
-#endif
-
-/* Hardware text mode color constants. */
-enum vga_color
+ 
+// This is the x86's VGA textmode buffer. To display text, we write data to this memory location
+volatile uint16_t* vga_buffer = (uint16_t*)0xB8000;
+// By default, the VGA textmode buffer has a size of 80x25 characters
+const int VGA_COLS = 80;
+const int VGA_ROWS = 25;
+ 
+// We start displaying text in the top-left of the screen (column = 0, row = 0)
+int term_col = 0;
+int term_row = 0;
+uint8_t term_color = 0x0F; // Black background, White foreground
+ 
+// This function initiates the terminal by clearing it
+void term_init()
 {
-	VGA_COLOR_BLACK = 0,
-	VGA_COLOR_BLUE = 1,
-	VGA_COLOR_GREEN = 2,
-	VGA_COLOR_CYAN = 3,
-	VGA_COLOR_RED = 4,
-	VGA_COLOR_MAGENTA = 5,
-	VGA_COLOR_BROWN = 6,
-	VGA_COLOR_LIGHT_GREY = 7,
-	VGA_COLOR_DARK_GREY = 8,
-	VGA_COLOR_LIGHT_BLUE = 9,
-	VGA_COLOR_LIGHT_GREEN = 10,
-	VGA_COLOR_LIGHT_CYAN = 11,
-	VGA_COLOR_LIGHT_RED = 12,
-	VGA_COLOR_LIGHT_MAGENTA = 13,
-	VGA_COLOR_LIGHT_BROWN = 14,
-	VGA_COLOR_WHITE = 15,
-};
-
-static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg)
-{
-	return fg | bg << 4;
-}
-
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
-{
-	return (uint16_t)uc | (uint16_t)color << 8;
-}
-
-size_t strlen(const char *str)
-{
-	size_t len = 0;
-	while (str[len])
-		len++;
-	return len;
-}
-
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
-
-size_t terminal_row;
-size_t terminal_column;
-uint8_t terminal_color;
-uint16_t *terminal_buffer;
-
-void terminal_initialize(void)
-{
-	terminal_row = 0;
-	terminal_column = 0;
-	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
-	terminal_buffer = (uint16_t *)0xB8000;
-	for (size_t y = 0; y < VGA_HEIGHT; y++)
+	// Clear the textmode buffer
+	for (int col = 0; col < VGA_COLS; col ++)
 	{
-		for (size_t x = 0; x < VGA_WIDTH; x++)
+		for (int row = 0; row < VGA_ROWS; row ++)
 		{
-			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = vga_entry(' ', terminal_color);
+			// The VGA textmode buffer has size (VGA_COLS * VGA_ROWS).
+			// Given this, we find an index into the buffer for our character
+			const size_t index = (VGA_COLS * row) + col;
+			// Entries in the VGA buffer take the binary form BBBBFFFFCCCCCCCC, where:
+			// - B is the background color
+			// - F is the foreground color
+			// - C is the ASCII character
+			vga_buffer[index] = ((uint16_t)term_color << 8) | ' '; // Set the character to blank (a space character)
 		}
 	}
 }
-
-void terminal_setcolor(uint8_t color)
+ 
+// This function places a single character onto the screen
+void term_putc(char c)
 {
-	terminal_color = color;
-}
-
-void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
-{
-	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = vga_entry(c, color);
-}
-
-void scroll_up(void)
-{
-	for (size_t i = 0; i < (VGA_HEIGHT - 1) * VGA_WIDTH; i++)
+	// Remember - we don't want to display ALL characters!
+	switch (c)
 	{
-		terminal_buffer[i] = terminal_buffer[i + VGA_WIDTH];
-	}
-}
-
-void terminal_putchar(char c)
-{
-	if (c == '\n')
-	{
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
+	case '\n': // Newline characters should return the column to 0, and increment the row
 		{
-			scroll_up();
-			terminal_row = VGA_HEIGHT - 1;
+			term_col = 0;
+			term_row ++;
+			break;
+		}
+ 
+	default: // Normal characters just get displayed and then increment the column
+		{
+			const size_t index = (VGA_COLS * term_row) + term_col; // Like before, calculate the buffer index
+			vga_buffer[index] = ((uint16_t)term_color << 8) | c;
+			term_col ++;
+			break;
 		}
 	}
-	else
+ 
+	// What happens if we get past the last column? We need to reset the column to 0, and increment the row to get to a new line
+	if (term_col >= VGA_COLS)
 	{
-		uint8_t random_color = vga_entry_color(terminal_row % (VGA_COLOR_WHITE + 1), terminal_column % (VGA_COLOR_WHITE + 1));
-		terminal_setcolor(random_color);
-		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-		if (++terminal_column == VGA_WIDTH)
-		{
-			terminal_column = 0;
-			if (++terminal_row == VGA_HEIGHT)
-			{
-				scroll_up();
-				terminal_row = VGA_HEIGHT - 1;
-			}
-		}
+		term_col = 0;
+		term_row ++;
+	}
+ 
+	// What happens if we get past the last row? We need to reset both column and row to 0 in order to loop back to the top of the screen
+	if (term_row >= VGA_ROWS)
+	{
+		term_col = 0;
+		term_row = 0;
 	}
 }
-
-void terminal_write(const char *data, size_t size)
+ 
+// This function prints an entire string onto the screen
+void term_print(const char* str)
 {
-	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
+	for (size_t i = 0; str[i] != '\0'; i ++) // Keep placing characters until we hit the null-terminating character ('\0')
+		term_putc(str[i]);
 }
-
-void terminal_writestring(const char *data)
+ 
+ 
+ 
+// This is our kernel's main function
+void kernel_main()
 {
-	terminal_write(data, strlen(data));
-}
-
-void kernel_main(void)
-{
-	/* Initialize terminal interface */
-	terminal_initialize();
-
-	/* Newline support is left as an exercise. */
-	terminal_writestring("1.Hello, kernel World!\n2.This is FFFOS\n3.Hello, kernel World!\n4.This is FFFOS\n5.Hello, kernel World!\n6.This is FFFOS\n7.Hello, kernel World!\n8.This is FFFOS\n9.Hello, kernel World!\n10.This is FFFOS\n11.Hello, kernel World!\n12.This is FFFOS\n13.Hello, kernel World!\n14.This is FFFOS\n15.Hello, kernel World!\n16.This is FFFOS\n17.Hello, kernel World!\n18.This is FFFOS\n19.Hello, kernel World!\n20.This is FFFOS\n21.Hello, kernel World!\n22.This is FFFOS\n23.Hello, kernel World!\n24.This is FFFOS\n25.Hello, kernel World!\n26.This is FFFOS\n27.Hello, kernel World!\n28.This is FFFOS\n");
+	// We're here! Let's initiate the terminal and display a message to show we got here.
+ 
+	// Initiate terminal
+	term_init();
+ 
+	// Display some messages
+	term_print("Hello, World!\n");
+	term_print("Welcome to the kernel.\n");
 }
