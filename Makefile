@@ -4,4 +4,7 @@ all:
 	${CC} -std=gnu99 -ffreestanding -g -c start.s -o start.o
 	${CC} -std=gnu99 -ffreestanding -g -c kernel.c -o kernel.o
 	${CC} -ffreestanding -nostdlib -g -T linker.ld start.o kernel.o -o mykernel.elf -lgcc
-	qemu-system-i386 -kernel mykernel.elf
+	# qemu-system-i386 -kernel mykernel.elf
+	mv mykernel.elf isoroot/boot/mykernel.elf
+	grub-mkrescue isoroot -o mykernel.iso
+	qemu-system-i386 -cdrom mykernel.iso
