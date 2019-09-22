@@ -61,9 +61,11 @@ myos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	# -print-file-name打印库文件名
 	# $(@F)表示$@的值去掉路径前缀，只剩文件名
+	# ``用来执行命令
+	# $$是脚本运行时的PID
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
  
-.c.o:
+.c.o:	# -MD会进行预编译生成xxx.d的文件，用来存储预编译生成的依赖头文件路径
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
  
 .S.o:
@@ -72,6 +74,7 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 clean:
 	rm -f myos.kernel
 	rm -f $(OBJS) *.o */*.o */*/*.o
+	#	把OBJS中的文件后缀换成.d
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
  
 install: install-headers install-kernel
