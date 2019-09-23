@@ -3,7 +3,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
- 
+
+/**
+ * 打印data字符直到遇到EOF返回false，或者没有EOF全部打印后返回true
+ */
 static bool print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < length; i++)
@@ -11,7 +14,8 @@ static bool print(const char* data, size_t length) {
 			return false;
 	return true;
 }
- 
+
+// restrict表示该指针所指数据只能由该指针修改
 int printf(const char* restrict format, ...) {
 	va_list parameters;
 	va_start(parameters, format);
