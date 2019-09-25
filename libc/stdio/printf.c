@@ -17,16 +17,16 @@ static bool print(const char* data, size_t length) {
 
 // restrict表示该指针所指数据只能由该指针修改
 int printf(const char* restrict format, ...) {
-	va_list parameters;
-	va_start(parameters, format);
+	va_list parameters;	// 定义了一个指针，指针指向可变参数
+	va_start(parameters, format);	// 将parameters指针指向format位置，也就是可变参数前一个参数的位置
  
 	int written = 0;
  
 	while (*format != '\0') {
-		size_t maxrem = INT_MAX - written;
+		size_t maxrem = INT_MAX - written;	// 最多还可写入多少
  
-		if (format[0] != '%' || format[1] == '%') {
-			if (format[0] == '%')
+		if (format[0] != '%' || format[1] == '%') {	// 当前字符串第一个位置不是%或者第二个位置是%
+			if (format[0] == '%')	// 第二个位置肯定是%
 				format++;
 			size_t amount = 1;
 			while (format[amount] && format[amount] != '%')
@@ -46,7 +46,7 @@ int printf(const char* restrict format, ...) {
  
 		if (*format == 'c') {
 			format++;
-			char c = (char) va_arg(parameters, int /* char promotes to int */);
+			char c = (char) va_arg(parameters, int /* char promotes to int */);	// 获取可变参数的下一个参数，并返回int类型
 			if (!maxrem) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
