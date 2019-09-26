@@ -27,9 +27,9 @@ int printf(const char* restrict format, ...) {
  
 		if (format[0] != '%' || format[1] == '%') {	// 当前字符串第一个位置不是%或者第二个位置是%
 			if (format[0] == '%')	// 第二个位置肯定是%
-				format++;
+				format++;	// 前两个是%，字符串往后移
 			size_t amount = 1;
-			while (format[amount] && format[amount] != '%')
+			while (format[amount] && format[amount] != '%')	// 不是%，数量+1
 				amount++;
 			if (maxrem < amount) {
 				// TODO: Set errno to EOVERFLOW.
@@ -41,10 +41,10 @@ int printf(const char* restrict format, ...) {
 			written += amount;
 			continue;
 		}
+		// format第一个位置是%第二个位置不是%
+		const char* format_begun_at = format++;	// format后移一位，跳过%；format_begun_at保存format最初地址
  
-		const char* format_begun_at = format++;
- 
-		if (*format == 'c') {
+		if (*format == 'c') {	// %c打印字符
 			format++;
 			char c = (char) va_arg(parameters, int /* char promotes to int */);	// 获取可变参数的下一个参数，并返回int类型
 			if (!maxrem) {
@@ -54,7 +54,7 @@ int printf(const char* restrict format, ...) {
 			if (!print(&c, sizeof(c)))
 				return -1;
 			written++;
-		} else if (*format == 's') {
+		} else if (*format == 's') {	// %s打印字符串
 			format++;
 			const char* str = va_arg(parameters, const char*);
 			size_t len = strlen(str);
@@ -65,7 +65,7 @@ int printf(const char* restrict format, ...) {
 			if (!print(str, len))
 				return -1;
 			written += len;
-		} else {
+		} else {	// %+其他字符
 			format = format_begun_at;
 			size_t len = strlen(format);
 			if (maxrem < len) {
@@ -79,6 +79,6 @@ int printf(const char* restrict format, ...) {
 		}
 	}
  
-	va_end(parameters);
+	va_end(parameters);	// 会将指针设置为NULL
 	return written;
 }
