@@ -11,5 +11,5 @@ void abort(void) {
 	printf("abort()\n");
 #endif
 	while (1) { }
-	__builtin_unreachable();
+	__builtin_unreachable();	// 告诉编译器不可达，可以用来优化
 }

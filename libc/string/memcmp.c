@@ -1,5 +1,8 @@
 #include <string.h>
- 
+
+/**
+ * 比较内存大小
+ */
 int memcmp(const void* aptr, const void* bptr, size_t size) {
 	const unsigned char* a = (const unsigned char*) aptr;
 	const unsigned char* b = (const unsigned char*) bptr;
