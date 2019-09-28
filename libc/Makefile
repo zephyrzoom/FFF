@@ -1,6 +1,6 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=DEFAULT_HOST
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+DEFAULT_HOST!=../default-host.sh	# i686-elf
+HOST?=DEFAULT_HOST	# i686-elf
+HOSTARCH!=../target-triplet-to-arch.sh $(HOST)	# i686，取出-前面的系统架构信息
  
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -16,12 +16,13 @@ LIBDIR?=$(EXEC_PREFIX)/lib
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
 CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
 LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
- 
+LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk	# 这里定义的宏可以在代码中做判定
+
 ARCHDIR=arch/$(HOSTARCH)
- 
+
 include $(ARCHDIR)/make.config
- 
+
+# 把config文件中的flag也加进来
 CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
@@ -56,13 +57,13 @@ BINARIES=libk.a
  
 all: $(BINARIES)
  
-libc.a: $(OBJS)
+libc.a: $(OBJS)	# ar 用来创建静态库
 	$(AR) rcs $@ $(OBJS)
  
 libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
- 
-.c.o:
+
+.c.o:	# $<第一个依赖文件的名称，后面的可能是.h文件;.c.o表示所有的.c和对应的.o文件
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
  
 .c.S:
